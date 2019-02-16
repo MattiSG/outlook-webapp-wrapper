@@ -22,5 +22,15 @@ app.once('ready', () => {
         webmail.webContents.executeJavaScript(`tokenValue = ${tokenValue}`)
         webmail.webContents.executeJavaScript(autofillScript)
     })
+
+    webmail.on('page-title-updated', (event, title) => {
+        if (title == 'F5 Dynamic Webtop')
+            selectWebmailIcon(webmail)
+    })
 })
 
+
+
+function selectWebmailIcon(view) {
+    view.webContents.executeJavaScript('document.querySelector("[class=image]").click()')
+}
