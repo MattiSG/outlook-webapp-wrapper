@@ -1,0 +1,10 @@
+{
+  "name": "mail-diplomatie",
+  "main": "index.js",
+  "scripts": {
+    "start": "deskgap ."
+  },
+  "dependencies": {
+    "deskgap": "0.0.7"
+  }
+}
