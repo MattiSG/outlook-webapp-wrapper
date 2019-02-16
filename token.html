@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Token</title>
+
+        <style type="text/css">
+            input {
+                font-size: 400%;
+                font-family: monospace;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Token</h1>
+        <input type="text" name="password" focus>
+
+        <script type="text/javascript">
+            document.querySelector('input').addEventListener('keyup', function(event) {
+                tokenValue = event.target.value
+
+                if (tokenValue.length == 8)
+                    document.title = tokenValue
+            })
+        </script>
+    </body>
+</html>
