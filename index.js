@@ -1,5 +1,7 @@
 const { app, BrowserWindow } = require('electron')
 
+const USERNAME = 'schneiderm'
+
 
 app.once('ready', () => {
     const token = new BrowserWindow({ width: 500, height: 200 })
@@ -8,19 +10,11 @@ app.once('ready', () => {
     const webmail = new BrowserWindow({ show: false })
     webmail.loadURL('https://portalis.diplomatie.gouv.fr/')
 
-    let autofillScript = ''
-
-    require('fs').readFile('./autofill.js', 'utf8', (err, contents) => {
-        if (err) return console.error(err)
-        autofillScript = contents
-    })
-
     token.on('page-title-updated', (event, tokenValue) => {
         if (tokenValue == 'Token') return 'initial load';
         token.close()
         webmail.show()
-        webmail.webContents.executeJavaScript(`tokenValue = ${tokenValue}`)
-        webmail.webContents.executeJavaScript(autofillScript)
+        autofillOuterLogin(webmail, tokenValue)
     })
 
     webmail.on('page-title-updated', (event, title) => {
@@ -30,6 +24,11 @@ app.once('ready', () => {
 })
 
 
+function autofillOuterLogin(view, password) {
+    view.webContents.executeJavaScript(`document.querySelector("input[name=username]").value = "${USERNAME}"`)
+    view.webContents.executeJavaScript(`document.querySelector("input[name=password]").value = "${password}"`)
+    view.webContents.executeJavaScript('document.querySelector("input[type=submit]").click()')
+}
 
 function selectWebmailIcon(view) {
     view.webContents.executeJavaScript('document.querySelector("[class=image]").click()')
