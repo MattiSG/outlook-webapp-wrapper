@@ -2,6 +2,7 @@ const { app, BrowserWindow } = require('electron')
 
 const USERNAME = 'schneiderm'
 const PASSWORD = 'HERE GOES YOUR PASSWORD'
+const FULL_NAME = 'SCHNEIDER Matti'  // full name as registered in the Outlook web app, used to detect a successful login
 
 
 app.once('ready', () => {
@@ -26,9 +27,10 @@ app.once('ready', () => {
             .then(webmailWindow => {
                 return webmailWindow.webContents.executeJavaScript('document.getElementById("rdoPrvt").click()')  // select "private computer" radio button
                     .then(_ => login(webmailWindow, USERNAME, PASSWORD))
+            }).then(whenTitleBecomes(`${FULL_NAME} - Outlook Web App`))
             .then(webmailWindow => {
-                webmailWindow.webContents.executeJavaScript('document.getElementById("rdoPrvt").click()')  // select "private computer" radio button
-                login(webmailWindow, USERNAME, PASSWORD)
+                appChooserWindow.hide()  // if closed, would close its child webmailWindow as well
+                webmailWindow.setFullScreen(true)
             })
     })
 })
