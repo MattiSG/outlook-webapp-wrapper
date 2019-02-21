@@ -8,37 +8,38 @@ app.once('ready', () => {
     const token = new BrowserWindow({ width: 500, height: 200 })
     token.loadURL(`file://${__dirname}/token.html`)
 
-    const webmail = new BrowserWindow({ show: false })
-    webmail.loadURL('https://portalis.diplomatie.gouv.fr/')
+    const appChooserWindow = new BrowserWindow({ show: false })
+    appChooserWindow.loadURL('https://portalis.diplomatie.gouv.fr/')
 
     token.on('page-title-updated', (event, tokenValue) => {
         if (tokenValue == 'Token') return 'initial load';
+        console.log('2FA obtained')
         token.close()
-        webmail.show()
-        autofillOuterLogin(webmail, tokenValue)
-    })
+        appChooserWindow.show()
+        console.log('Outer login')
+        login(appChooserWindow, USERNAME, tokenValue)
 
-    webmail.on('page-title-updated', (event, title) => {
-        if (title == 'F5 Dynamic Webtop') {  // first login successful, select the app to use
-            selectWebmailIcon(webmail)
-                .then(getWebmailWindow)
-                .then(webmailWindow => {
-                    webmailWindow.on('page-title-updated', (event, title) => {
-                        if (title == 'Outlook Web App')
-                            autofillInnerLogin(webmailWindow, PASSWORD)
-                    })
-                })
-        }
+        whenTitleBecomes(appChooserWindow, 'F5 Dynamic Webtop')
+            .then(selectWebmailIcon)
+            .then(getWebmailWindow)
+            .then(webmailWindow => whenTitleBecomes(webmailWindow, 'Outlook Web App'))
+            .then(webmailWindow => {
+                webmailWindow.webContents.executeJavaScript('document.getElementById("rdoPrvt").click()')  // select "private computer" radio button
+                login(webmailWindow, USERNAME, PASSWORD)
+            })
     })
 })
 
+function login(webview, username, password) {
+    console.log('Logging in')
 
-function autofillOuterLogin(view, password) {
-    console.log('Outer login')
+    setInput(webview, 'username', username)
+    setInput(webview, 'password', password)
+    webview.webContents.executeJavaScript('document.querySelector("input[type=submit]").click()')
+}
 
-    view.webContents.executeJavaScript(`document.querySelector("input[name=username]").value = "${USERNAME}"`)
-    view.webContents.executeJavaScript(`document.querySelector("input[name=password]").value = "${password}"`)
-    view.webContents.executeJavaScript('document.querySelector("input[type=submit]").click()')
+function setInput(webview, inputName, value) {
+    webview.webContents.executeJavaScript(`document.querySelector("input[name=${inputName}]").value = "${value}"`)
 }
 
 function selectWebmailIcon(view) {
@@ -50,16 +51,14 @@ function selectWebmailIcon(view) {
 function getWebmailWindow() {
     console.log('Identifying webmail window')
 
-    return BrowserWindow.getAllWindows().find(window => {
-        return window.getTitle() == '_blank'
-    })
+    return BrowserWindow.getAllWindows().find(window => window.getTitle() == '_blank')
 }
 
-function autofillInnerLogin(view, password) {
-    console.log('Inner login')
-
-    view.webContents.executeJavaScript('document.getElementById("rdoPrvt").click()')
-    view.webContents.executeJavaScript(`document.getElementById("username").value = "${USERNAME}"`)
-    view.webContents.executeJavaScript(`document.getElementById("password").value = "${password}"`)
-    view.webContents.executeJavaScript('document.querySelector("input[type=submit]").click()')
+function whenTitleBecomes(window, expectedTitle) {
+    return new Promise((resolve, reject) => {
+        window.on('page-title-updated', (event, title) => {
+            if (title == expectedTitle)
+                resolve(window, title)
+        })
+    })
 }
