@@ -1,19 +1,32 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
     <head>
         <meta charset="UTF-8">
         <title>Token</title>
 
         <style type="text/css">
+            h1 {
+                font-family: sans-serif;
+                text-align: center;
+            }
+
             input {
                 font-size: 400%;
                 font-family: monospace;
+                width: 6em;
             }
         </style>
     </head>
     <body>
-        <h1>Token</h1>
-        <input type="text" name="password" focus>
+        <h1>2FA token</h1>
+        <input name="token"
+            inputmode="numeric"
+            min="0"
+            max="99999999"
+            placeholder="--------"
+            autocomplete="off"
+            autofocus
+        >
 
         <script type="text/javascript">
             document.querySelector('input').addEventListener('keyup', function(event) {
