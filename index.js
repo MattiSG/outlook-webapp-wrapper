@@ -17,12 +17,15 @@ app.once('ready', () => {
         token.close()
         appChooserWindow.show()
         console.log('Outer login')
-        login(appChooserWindow, USERNAME, tokenValue)
 
-        whenTitleBecomes(appChooserWindow, 'F5 Dynamic Webtop')
+        login(appChooserWindow, USERNAME, tokenValue)
+            .then(whenTitleBecomes('F5 Dynamic Webtop'))
             .then(selectWebmailIcon)
             .then(getWebmailWindow)
-            .then(webmailWindow => whenTitleBecomes(webmailWindow, 'Outlook Web App'))
+            .then(whenTitleBecomes('Outlook Web App'))
+            .then(webmailWindow => {
+                return webmailWindow.webContents.executeJavaScript('document.getElementById("rdoPrvt").click()')  // select "private computer" radio button
+                    .then(_ => login(webmailWindow, USERNAME, PASSWORD))
             .then(webmailWindow => {
                 webmailWindow.webContents.executeJavaScript('document.getElementById("rdoPrvt").click()')  // select "private computer" radio button
                 login(webmailWindow, USERNAME, PASSWORD)
@@ -33,13 +36,14 @@ app.once('ready', () => {
 function login(webview, username, password) {
     console.log('Logging in')
 
-    setInput(webview, 'username', username)
-    setInput(webview, 'password', password)
-    webview.webContents.executeJavaScript('document.querySelector("input[type=submit]").click()')
+    return setInput(webview, 'username', username)
+        .then(_ => setInput(webview, 'password', password))
+        .then(_ => webview.webContents.executeJavaScript('document.querySelector("input[type=submit]").click()'))
+        .then(_ => webview)
 }
 
 function setInput(webview, inputName, value) {
-    webview.webContents.executeJavaScript(`document.querySelector("input[name=${inputName}]").value = "${value}"`)
+    return webview.webContents.executeJavaScript(`document.querySelector("input[name=${inputName}]").value = "${value}"`)
 }
 
 function selectWebmailIcon(view) {
@@ -54,11 +58,13 @@ function getWebmailWindow() {
     return BrowserWindow.getAllWindows().find(window => window.getTitle() == '_blank')
 }
 
-function whenTitleBecomes(window, expectedTitle) {
-    return new Promise((resolve, reject) => {
-        window.on('page-title-updated', (event, title) => {
-            if (title == expectedTitle)
-                resolve(window, title)
+function whenTitleBecomes(expectedTitle) {
+    return function(window) {
+        return new Promise((resolve, reject) => {
+            window.on('page-title-updated', (event, title) => {
+                if (title == expectedTitle)
+                    resolve(window, title)
+            })
         })
-    })
+    }
 }
