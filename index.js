@@ -36,8 +36,6 @@ app.once('ready', () => {
 })
 
 function login(webview, username, password) {
-    console.log('Logging in')
-
     return setInput(webview, 'username', username)
         .then(_ => setInput(webview, 'password', password))
         .then(_ => webview.webContents.executeJavaScript('document.querySelector("input[type=submit]").click()'))
@@ -49,14 +47,10 @@ function setInput(webview, inputName, value) {
 }
 
 function selectWebmailIcon(view) {
-    console.log('Choosing webmail app')
-
     return view.webContents.executeJavaScript('document.querySelector("[class=image]").click()')
 }
 
 function getWebmailWindow() {
-    console.log('Identifying webmail window')
-
     return BrowserWindow.getAllWindows().find(window => window.getTitle() == '_blank')
 }
 
