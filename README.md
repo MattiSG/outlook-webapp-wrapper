@@ -4,7 +4,7 @@ Outlook is a pain. The outdated web-based version of Outlook is even worse. Howe
 
 ## Setup
 
-As of now, you need to edit the `index.js` file with your username and full name.
+As of now, you need to edit the `index.js` file with the server URL, your username and full name.
 
 ## Starting the app
 
