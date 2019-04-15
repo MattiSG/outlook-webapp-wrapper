@@ -9,3 +9,7 @@ As of now, you need to edit the `index.js` file with your username and full name
 ## Starting the app
 
 `npm install && npm start`
+
+## License
+
+EUPL v1.2
