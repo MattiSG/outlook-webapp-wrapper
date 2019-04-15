@@ -1,8 +1,10 @@
 const { app, BrowserWindow } = require('electron')
+const timers = require('timers')
 
 const USERNAME = 'schneiderm'
 const PASSWORD = 'HERE GOES YOUR PASSWORD'
 const FULL_NAME = 'SCHNEIDER Matti'  // full name as registered in the Outlook web app, used to detect a successful login
+const BADGE_UPDATE_FREQUENCY = 15  // in seconds
 
 
 app.once('ready', () => {
@@ -31,6 +33,10 @@ app.once('ready', () => {
             .then(webmailWindow => {
                 appChooserWindow.hide()  // if closed, would close its child webmailWindow as well
                 webmailWindow.setFullScreen(true)
+                return webmailWindow
+            }).then(webmailWindow => {
+                updateBadge(webmailWindow)
+                timers.setInterval(() => updateBadge(webmailWindow), BADGE_UPDATE_FREQUENCY * 1000)
             })
     })
 })
@@ -63,4 +69,8 @@ function whenTitleBecomes(expectedTitle) {
             })
         })
     }
+}
+
+function updateBadge(webview) {
+    webview.webContents.executeJavaScript('var unreadCount = document.querySelector("#spnUC #spnCV"); unreadCount && unreadCount.innerText || ""').then(app.dock.setBadge)
 }
