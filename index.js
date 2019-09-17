@@ -116,5 +116,5 @@ function setPassword() {
 }
 
 function updateBadge(webview) {
-    webview.webContents.executeJavaScript('var unreadCount = document.querySelector("#spnUC #spnCV"); unreadCount && unreadCount.innerText || ""').then(app.dock.setBadge)
+    webview.webContents.executeJavaScript('var unreadCount = document.querySelector("#mailtree #divTrNdCC>div:first-child #spnCV"); unreadCount && unreadCount.innerText || ""').then(app.dock.setBadge)
 }
